@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kids Learning Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            touch-action: manipulation;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #FFE4E1, #E0F6FF, #F0FFF0);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            user-select: none;
+        }
+
+        .game-container {
+            max-width: 400px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 24px;
+            color: #FF6B6B;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .score {
+            font-size: 18px;
+            color: #4ECDC4;
+            margin-bottom: 20px;
+        }
+
+        /* Menu Screen */
+        .menu-screen {
+            display: block;
+        }
+
+        .subject-buttons {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .subject-btn {
+            padding: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .counting-btn {
+            background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+        }
+
+        .colors-btn {
+            background: linear-gradient(45deg, #4ECDC4, #44A08D);
+        }
+
+        .shapes-btn {
+            background: linear-gradient(45deg, #A8E6CF, #88D8A3);
+        }
+
+        .subject-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .subject-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Game Screen */
+        .game-screen {
+            display: none;
+        }
+
+        .back-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .subject-title {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .question-area {
+            background: #F8F9FA;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .question {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .shapes-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .shape {
+            width: 40px;
+            height: 40px;
+            margin: 5px;
+            border-radius: 50%;
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+
+        .shape.square {
+            border-radius: 8px;
+        }
+
+        .shape.triangle {
+            width: 0 !important;
+            height: 0 !important;
+            border-radius: 0 !important;
+            background-color: transparent !important;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 35px solid;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .options.three-options {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        .option-btn {
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: linear-gradient(45deg, #FF9A9E, #FECFEF);
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .option-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .option-btn:active {
+            transform: scale(0.95);
+        }
+
+        .correct {
+            background: linear-gradient(45deg, #4CAF50, #8BC34A) !important;
+            animation: correctAnim 0.6s ease;
+        }
+
+        .incorrect {
+            background: linear-gradient(45deg, #F44336, #FF5722) !important;
+            animation: shake 0.6s ease;
+        }
+
+        @keyframes correctAnim {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .feedback {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 15px 0;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .feedback.show {
+            opacity: 1;
+        }
+
+        .feedback.correct {
+            color: #4CAF50;
+        }
+
+        .feedback.incorrect {
+            color: #F44336;
+        }
+
+        .auto-next-info {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #FF6B6B;
+            animation: confetti-fall 3s linear infinite;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #E0E0E0;
+            border-radius: 3px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #4ECDC4, #44A08D);
+            width: 0%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="title">🎯 Learning Fun!</h1>
+        <div class="score">Score: <span id="score">0</span></div>
+        
+        <!-- Menu Screen -->
+        <div class="menu-screen" id="menu-screen">
+            <h2 style="margin-bottom: 20px; color: #666;">Choose what to practice:</h2>
+            <div class="subject-buttons">
+                <button class="subject-btn counting-btn" onclick="startSubject('counting')">
+                    🔢 Counting (1-5)
+                </button>
+                <button class="subject-btn colors-btn" onclick="startSubject('colors')">
+                    🌈 Colors
+                </button>
+                <button class="subject-btn shapes-btn" onclick="startSubject('shapes')">
+                    📐 Shapes
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="game-screen" id="game-screen">
+            <button class="back-btn" onclick="goToMenu()">← Back to Menu</button>
+            
+            <div class="subject-title" id="subject-title"></div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            
+            <div class="question-area">
+                <div class="question" id="question">Let's start learning!</div>
+                <div class="shapes-container" id="shapes-container"></div>
+            </div>
+
+            <div class="feedback" id="feedback"></div>
+            
+            <div class="options" id="options"></div>
+            
+            <div class="auto-next-info">Next question coming soon...</div>
+        </div>
+    </div>
+
+    <div class="celebration" id="celebration"></div>
+
+    <script>
+        let currentSubject = '';
+        let currentQuestion = 0;
+        let score = 0;
+        let correctAnswer = '';
+        let hasAnswered = false;
+        let questionsInSubject = 0;
+        let autoNextTimeout;
+
+        // Audio context for sounds
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Create win sound (happy tune)
+        function playWinSound() {
+            const frequencies = [523.25, 659.25, 783.99]; // C5, E5, G5
+            frequencies.forEach((freq, index) => {
+                setTimeout(() => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                }, index * 100);
+            });
+        }
+
+        // Create lose sound (sad tune)
+        function playLoseSound() {
+            const frequencies = [400, 350, 300]; // Descending sad notes
+            frequencies.forEach((freq, index) => {
+                setTimeout(() => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+                    oscillator.type = 'sawtooth';
+                    
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.4);
+                }, index * 150);
+            });
+        }
+
+        const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange'];
+        const shapes = ['circle', 'square', 'triangle'];
+        const colorNames = {
+            'red': '🔴 Red',
+            'blue': '🔵 Blue', 
+            'green': '🟢 Green',
+            'yellow': '🟡 Yellow',
+            'purple': '🟣 Purple',
+            'orange': '🟠 Orange'
+        };
+
+        function startSubject(subject) {
+            currentSubject = subject;
+            currentQuestion = 0;
+            questionsInSubject = 0;
+            
+            document.getElementById('menu-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            
+            const titles = {
+                'counting': '🔢 Counting Practice',
+                'colors': '🌈 Color Learning',
+                'shapes': '📐 Shape Recognition'
+            };
+            
+            document.getElementById('subject-title').textContent = titles[subject];
+            generateQuestion();
+        }
+
+        function goToMenu() {
+            if (autoNextTimeout) {
+                clearTimeout(autoNextTimeout);
+            }
+            document.getElementById('menu-screen').style.display = 'block';
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('feedback').className = 'feedback';
+        }
+
+        function updateProgress() {
+            const progress = ((questionsInSubject % 10) / 10) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+        }
+
+        function generateCountingQuestion() {
+            const count = Math.floor(Math.random() * 5) + 1; // 1-5
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const shape = shapes[Math.floor(Math.random() * shapes.length)];
+            
+            document.getElementById('question').textContent = `How many ${color} ${shape}s do you see?`;
+            
+            const container = document.getElementById('shapes-container');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < count; i++) {
+                const shapeDiv = document.createElement('div');
+                shapeDiv.className = `shape ${shape}`;
+                if (shape === 'triangle') {
+                    shapeDiv.style.borderBottomColor = color;
+                } else {
+                    shapeDiv.style.backgroundColor = color;
+                }
+                container.appendChild(shapeDiv);
+            }
+            
+            correctAnswer = count.toString();
+            
+            // Generate options
+            const options = [count];
+            while (options.length < 4) {
+                const option = Math.floor(Math.random() * 5) + 1;
+                if (!options.includes(option)) {
+                    options.push(option);
+                }
+            }
+            
+            return shuffleArray(options);
+        }
+
+        function generateColorQuestion() {
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const shape = shapes[Math.floor(Math.random() * shapes.length)];
+            const count = Math.floor(Math.random() * 3) + 2; // 2-4
+            
+            document.getElementById('question').textContent = `What color are these ${shape}s?`;
+            
+            const container = document.getElementById('shapes-container');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < count; i++) {
+                const shapeDiv = document.createElement('div');
+                shapeDiv.className = `shape ${shape}`;
+                if (shape === 'triangle') {
+                    shapeDiv.style.borderBottomColor = color;
+                } else {
+                    shapeDiv.style.backgroundColor = color;
+                }
+                container.appendChild(shapeDiv);
+            }
+            
+            correctAnswer = color;
+            
+            // Generate color options
+            const options = [color];
+            while (options.length < 4) {
+                const option = colors[Math.floor(Math.random() * colors.length)];
+                if (!options.includes(option)) {
+                    options.push(option);
+                }
+            }
+            
+            return shuffleArray(options).map(c => colorNames[c] || c);
+        }
+
+        function generateShapeQuestion() {
+            const shape = shapes[Math.floor(Math.random() * shapes.length)];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const count = Math.floor(Math.random() * 3) + 2; // 2-4
+            
+            document.getElementById('question').textContent = `What shape do you see?`;
+            
+            const container = document.getElementById('shapes-container');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < count; i++) {
+                const shapeDiv = document.createElement('div');
+                shapeDiv.className = `shape ${shape}`;
+                shapeDiv.style.backgroundColor = color;
+                if (shape === 'triangle') {
+                    shapeDiv.style.borderBottomColor = color;
+                }
+                container.appendChild(shapeDiv);
+            }
+            
+            correctAnswer = shape;
+            
+            // Generate shape options - only use 3 since we have 3 shapes
+            const shapeNames = {
+                'circle': '⭕ Circle',
+                'square': '🟦 Square',
+                'triangle': '🔺 Triangle'
+            };
+            
+            return shapes.map(s => shapeNames[s] || s);
+        }
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function createOptions(optionsList) {
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            // Add class for 3 options layout (shapes)
+            if (optionsList.length === 3) {
+                optionsContainer.className = 'options three-options';
+            } else {
+                optionsContainer.className = 'options';
+            }
+            
+            optionsList.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'option-btn';
+                button.textContent = option;
+                button.onclick = () => checkAnswer(option, button);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function checkAnswer(selectedAnswer, button) {
+            if (hasAnswered) return;
+            
+            hasAnswered = true;
+            const feedback = document.getElementById('feedback');
+            
+            // Enable audio context on user interaction
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
+            let isCorrect = false;
+            
+            if (currentSubject === 'colors') {
+                isCorrect = selectedAnswer.toLowerCase().includes(correctAnswer);
+            } else if (currentSubject === 'shapes') {
+                isCorrect = selectedAnswer.toLowerCase().includes(correctAnswer);
+            } else {
+                isCorrect = selectedAnswer == correctAnswer;
+            }
+            
+            if (isCorrect) {
+                button.classList.add('correct');
+                feedback.textContent = '🎉 Awesome!';
+                feedback.className = 'feedback correct show';
+                score += 10;
+                document.getElementById('score').textContent = score;
+                playWinSound();
+                createConfetti();
+            } else {
+                button.classList.add('incorrect');
+                feedback.textContent = '😔 Good try!';
+                feedback.className = 'feedback incorrect show';
+                playLoseSound();
+            }
+            
+            // Disable all buttons
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.style.pointerEvents = 'none';
+            });
+            
+            // Auto advance to next question after 2 seconds
+            autoNextTimeout = setTimeout(() => {
+                nextQuestion();
+            }, 2000);
+        }
+
+        function createConfetti() {
+            const celebration = document.getElementById('celebration');
+            const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
+            
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 1 + 's';
+                    celebration.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 2000);
+                }, i * 30);
+            }
+        }
+
+        function generateQuestion() {
+            hasAnswered = false;
+            questionsInSubject++;
+            updateProgress();
+            
+            // Clear previous state
+            document.getElementById('feedback').className = 'feedback';
+            
+            let options = [];
+            
+            switch (currentSubject) {
+                case 'counting':
+                    options = generateCountingQuestion();
+                    break;
+                case 'colors':
+                    options = generateColorQuestion();
+                    break;
+                case 'shapes':
+                    options = generateShapeQuestion();
+                    break;
+            }
+            
+            createOptions(options);
+        }
+
+        function nextQuestion() {
+            if (autoNextTimeout) {
+                clearTimeout(autoNextTimeout);
+            }
+            generateQuestion();
+        }
+
+        // Initialize audio context on first user interaction
+        document.addEventListener('click', function() {
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }, { once: true });
+    </script>
+</body>
+</html>
